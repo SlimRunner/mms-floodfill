@@ -15,7 +15,6 @@ ifeq ($(detected_OS),Linux)
 	RM = rm -rf
 	FixPath = $1
 	MD = mkdir -p $1
-	AsyncExec = exec $1
 	FixQuotes = $1
 endif
 
@@ -69,14 +68,8 @@ $(DBG_APP_DIR)/$(TARGET): $(DBG_OBJECTS)
 
 # do not interpret these names as files
 .PHONY:
-	all build clean info run run-debug
+	all build clean info
 	build-debug clean-debug info-debug
-
-run: build
-	$(call FixPath,$(REL_APP_DIR)/$(TARGET))
-
-run-debug: build-debug
-	$(call FixPath,$(DBG_APP_DIR)/$(TARGET))
 
 build: CCFLAGS += -O2
 build: $(REL_APP_DIR)/$(TARGET)
