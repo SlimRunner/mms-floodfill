@@ -1,11 +1,11 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
-typedef enum Heading {NORTH, EAST, SOUTH, WEST} Heading;
-typedef enum Action {LEFT, FORWARD, RIGHT, IDLE} Action;
+#include "grid.h"
+#include "enums.h"
 
-Action solver();
-Action leftWallFollower();
-Action floodFill();
+Action solver(int success);
+Action leftWallFollower(int success);
+Action floodFillWalker(int success);
 
 #endif

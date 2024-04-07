@@ -56,12 +56,12 @@ int API_moveForward() {
     return getAck("moveForward");
 }
 
-void API_turnRight() {
-    getAck("turnRight");
+int API_turnRight() {
+    return getAck("turnRight");
 }
 
-void API_turnLeft() {
-    getAck("turnLeft");
+int API_turnLeft() {
+    return getAck("turnLeft");
 }
 
 void API_setWall(int x, int y, char direction) {
@@ -117,7 +117,7 @@ void debug_log(char* text) {
     fflush(stderr);
 }
 
-void dblog(const char *const format, ...) {
+void fdebug_log(const char *const format, ...) {
     // reference: https://stackoverflow.com/a/14358593/4938616
     va_list args;
     va_start(args, format);

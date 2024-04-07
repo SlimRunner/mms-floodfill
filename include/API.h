@@ -8,8 +8,8 @@ int API_wallRight();
 int API_wallLeft();
 
 int API_moveForward();  // Returns 0 if crash, else returns 1
-void API_turnRight();
-void API_turnLeft();
+int API_turnRight();
+int API_turnLeft();
 
 void API_setWall(int x, int y, char direction);
 void API_clearWall(int x, int y, char direction);
@@ -26,4 +26,4 @@ int API_wasReset();
 void API_ackReset();
 
 void debug_log(char* text);
-void dblog(const char *const format, ...);
+void fdebug_log(const char *const format, ...);

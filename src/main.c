@@ -9,21 +9,26 @@
 int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
+    int success = 1;
     debug_log("Running...");
+    initGrid();
     while (1) {
-        Action nextMove = solver();
+        Action nextMove = solver(success);
         switch(nextMove){
             case FORWARD:
-                API_moveForward();
+                success = API_moveForward();
                 break;
             case LEFT:
-                API_turnLeft();
+                success = API_turnLeft();
                 break;
             case RIGHT:
-                API_turnRight();
+                success = API_turnRight();
                 break;
             case IDLE:
                 break;
         }
     }
+    // I know this is never going to happen, but just in case
+    terminateGrid();
+    return 0;
 }

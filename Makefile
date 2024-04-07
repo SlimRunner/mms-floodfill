@@ -21,7 +21,7 @@ endif
 
 CC         := gcc
 CCVERSION  := -std=c11
-CCSTRICT   := -pedantic-errors
+CCSTRICT   := -pedantic-errors -Werror
 CCWARN     := -Wall -Wextra
 CCFLAGS    := $(CCVERSION) $(CCWARN) $(CCSTRICT)
 DEBUG_DIR   := $(call FixPath,./build/debug)
