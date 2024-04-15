@@ -8,4 +8,4 @@ Action solver(int success);
 Action leftWallFollower(int success);
 Action floodFillWalker(int success);
 
-#endif
+#endif // SOLVER_H

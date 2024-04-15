@@ -26,7 +26,11 @@ void advance(const Vec2i * const dir, Vec2i *pos) {
     pos->y += dir->y;
 }
 
-int serializeVec(const Vec2i vec) {
+Vec2i getMove(Vec2i p1 , Vec2i p2) {
+  return (Vec2i){p2.x + p1.x, p2.y + p1.y};
+}
+
+int flattenStdBasis(const Vec2i vec) {
     // I derived the following matrix like this
     // https://www.desmos.com/calculator/ecuq826hkn
 
@@ -57,4 +61,12 @@ int inRange(const Vec2i * const dir, Vec2i low, Vec2i high) {
     low.x <= dir->x && dir->x <= high.x &&
     low.y <= dir->y && dir->y <= high.y
   );
+}
+
+int serialize(const Vec2i * const dir, int width) {
+  return dir->x + dir->y * width;
+}
+
+Vec2i deserialize(int hash, int width) {
+  return (Vec2i){hash % width, hash / width};
 }

@@ -28,13 +28,15 @@ Vec2i getRightRot(Vec2i vec);
 /// @param pos current position (out)
 void advance(const Vec2i * const dir, Vec2i *pos);
 
+Vec2i getMove(Vec2i dir , Vec2i pos);
+
 /// @brief Flattens 2D grid onto X axis with the purpose of
 /// @brief returning a unique number from 0 to 3 for orthonormal
 /// @brief unit vectors.
 /// @param vec given orthonormal vector
 /// @return index from 0 to 3
 /// @link https://www.desmos.com/calculator/ecuq826hkn
-int serializeVec(const Vec2i vec);
+int flattenStdBasis(const Vec2i vec);
 
 /// @brief Returns associated char with Compass rose direction
 /// @param dir 
@@ -42,5 +44,9 @@ int serializeVec(const Vec2i vec);
 char compass(int dirSerial);
 
 int inRange(const Vec2i * const dir, Vec2i low, Vec2i high);
+
+int serialize(const Vec2i * const dir, int width);
+
+Vec2i deserialize(int hash, int width);
 
 #endif // VECTOR_H

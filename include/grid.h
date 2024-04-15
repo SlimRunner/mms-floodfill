@@ -6,7 +6,7 @@
 /// @brief Initializes a 2D array for the maze
 void initGrid();
 /// @brief Frees memory initialized for the 2D array
-void terminateGrid();
+void freeGrid();
 
 /// @brief Determines where are walls persent in given cell
 /// @param x x-coordinate of the cell

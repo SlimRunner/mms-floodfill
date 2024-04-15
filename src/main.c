@@ -29,6 +29,6 @@ int main(int argc, char* argv[]) {
         }
     }
     // I know this is never going to happen, but just in case
-    terminateGrid();
+    freeGrid();
     return 0;
 }

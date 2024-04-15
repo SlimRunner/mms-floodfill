@@ -21,7 +21,7 @@ Action leftWallFollower(int success) {
 
     Action outState;
 
-    fdebug_log("x: %d, y: %d, compass: %c (x: %d, y: %d)\n", pos.x, pos.y, compass(serializeVec(dir)), dir.x, dir.y);
+    fdebug_log("x: %d, y: %d, compass: %c (x: %d, y: %d)\n", pos.x, pos.y, compass(flattenStdBasis(dir)), dir.x, dir.y);
 
     if (goLeft) {
         advance(&dir, &pos);
@@ -31,7 +31,7 @@ Action leftWallFollower(int success) {
     }
 
     if(API_wallLeft()) {
-        API_setWall(pos.x, pos.y, compass(serializeVec(getLeftRot(dir))));
+        API_setWall(pos.x, pos.y, compass(flattenStdBasis(getLeftRot(dir))));
         if(API_wallFront()) {
             rotRight(&dir);
             outState = RIGHT;
