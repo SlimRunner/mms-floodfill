@@ -28,7 +28,7 @@ Vec2i getRightRot(Vec2i vec);
 /// @param pos current position (out)
 void advance(const Vec2i * const dir, Vec2i *pos);
 
-Vec2i getMove(Vec2i dir , Vec2i pos);
+Vec2i addVectors(Vec2i dir , Vec2i pos);
 
 /// @brief Flattens 2D grid onto X axis with the purpose of
 /// @brief returning a unique number from 0 to 3 for orthonormal
@@ -48,5 +48,9 @@ int inRange(const Vec2i * const dir, Vec2i low, Vec2i high);
 int serialize(const Vec2i * const dir, int width);
 
 Vec2i deserialize(int hash, int width);
+
+int dotProd(Vec2i a, Vec2i b);
+
+int getWinding(Vec2i a, Vec2i b);
 
 #endif // VECTOR_H

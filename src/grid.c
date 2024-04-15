@@ -131,6 +131,62 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
   return 0;
 }
 
+Action makeMove(Vec2i *pos, Vec2i *dir) {
+  int dirHash = serialize(dir, WIDTH);
+  Vec2i target;
+
+  debug_log("makeMove\n");
+
+  // BUGBUG: this is just going north always if I am facing north
+  // already. I need to make it so that instead chooses the direction of
+  // highest decent in distance to goal.
+  if (!(dirHash & NORTH)) {
+    target.x = 0;
+    target.y = 1;
+  } else if (!(dirHash & EAST)) {
+    target.x = 1;
+    target.y = 0;
+  } else if (!(dirHash & WEST)) {
+    target.x = -1;
+    target.y = 0;
+  } else {
+    return IDLE;
+  }
+
+  // to decide the move I will use a combination of the dot product and
+  // the two-point-slope equation at the origin.
+  // https://www.desmos.com/calculator/u9gmoingmu
+
+  switch (dotProd(target, *dir)) {
+  case 1:
+    advance(dir, pos);
+    return FORWARD;
+  case -1:
+    // arbitrary decision when facing the opposite way
+    rotLeft(dir);
+    return LEFT;
+  default:
+    // nothing to do
+    // need to decide how to rotate
+    break;
+  }
+
+  switch (getWinding(target, *dir)) {
+  case 1:
+    // go clockwise (positive rotation)
+    rotLeft(dir);
+    return LEFT;
+  case -1:
+    // go counter-clockwise (negative rotation)
+    rotRight(dir);
+    return RIGHT;
+  default:
+    debug_log("This is bad\n");
+    // this should technically never happen
+    return IDLE;
+  }
+}
+
 static int enqueue(int x, int y, int dist) {
   grid[y][x].dist = dist;
   grid[y][x].visited = visitBit;
@@ -146,12 +202,6 @@ static int enqueue(int x, int y, int dist) {
 }
 
 static void floodFill() {
-  // create a buffer of fixed size (W*H for now we can reduce it later)
-  // which is going to have three properties: leftnode, rightnode, and
-  // size. If leftnode == rightnode, size == 0. This will work as a
-  // queue for BFS. With this I do not have to dynamically allocate
-  // memory while traversing the grid. Additionally, if leftnode ==
-  // rightnode but size != 0 then we have overflow.
   initQueue(WIDTH * HEIGHT, sizeof(int));
 
   // push goal onto queue
@@ -180,7 +230,7 @@ static void floodFill() {
     pos = deserialize(qidx, WIDTH);
     here = grid[pos.y][pos.x];
     for (int i = 0; i < 4; ++i) {
-      next = getMove(pos, NBS[i]);
+      next = addVectors(pos, NBS[i]);
       if (
         inRange(&next, LOW_BOUND, UPP_BOUND) &&
         !(here.walls & WALL_MASK[i]) &&

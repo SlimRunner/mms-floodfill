@@ -2,6 +2,7 @@
 #define GRID_H
 
 #include "vector.h"
+#include "enums.h"
 
 /// @brief Initializes a 2D array for the maze
 void initGrid();
@@ -16,5 +17,7 @@ void freeGrid();
 int getCellState(Vec2i pos, int * state);
 
 int updateCellState(Vec2i pos, Vec2i dir, int * state);
+
+Action makeMove(Vec2i *pos, Vec2i *dir);
 
 #endif // GRID_H

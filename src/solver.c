@@ -67,8 +67,5 @@ Action floodFillWalker(int success) {
         debug_log("Bad position");
     }
     prevPos = pos;
-    // advance(&dir, &pos);
-    // return FORWARD;
-    rotRight(&dir);
-    return RIGHT;
+    return makeMove(&pos, &dir);
 }

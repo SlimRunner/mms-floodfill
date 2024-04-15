@@ -26,7 +26,7 @@ void advance(const Vec2i * const dir, Vec2i *pos) {
     pos->y += dir->y;
 }
 
-Vec2i getMove(Vec2i p1 , Vec2i p2) {
+Vec2i addVectors(Vec2i p1 , Vec2i p2) {
   return (Vec2i){p2.x + p1.x, p2.y + p1.y};
 }
 
@@ -69,4 +69,12 @@ int serialize(const Vec2i * const dir, int width) {
 
 Vec2i deserialize(int hash, int width) {
   return (Vec2i){hash % width, hash / width};
+}
+
+int dotProd(Vec2i a, Vec2i b) {
+  return a.x * b.x + a.y * b.y;
+}
+
+int getWinding(Vec2i a, Vec2i b) {
+  return -a.x * (b.y - a.y) + a.y * (b.x - a.x);
 }
