@@ -47,6 +47,8 @@ int inRange(const Vec2i * const dir, Vec2i low, Vec2i high);
 
 int serialize(const Vec2i * const dir, int width);
 
+int getSerial(Vec2i dir, int width);
+
 Vec2i deserialize(int hash, int width);
 
 int dotProd(Vec2i a, Vec2i b);

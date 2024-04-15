@@ -128,7 +128,9 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
     const int wallLeft  = API_wallLeft();
     const int wallRight = API_wallRight();
 
-    *state = 0;
+    // TODO: make it so that this does not change further once the cell
+    // has been visited by the mouse.
+    *state = grid[pos.y][pos.x].walls;
 
     if (wallFront) {
       const int serial = flattenStdBasis(dir);
@@ -164,37 +166,46 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
 }
 
 Action makeMove(Vec2i *pos, Vec2i *dir) {
-  int dirHash = serialize(dir, WIDTH);
+  int dirHash = flattenStdBasis(*dir);
+  int lftHash = flattenStdBasis(getLeftRot(*dir));
+  int rgtHash = flattenStdBasis(getRightRot(*dir));
+  int walls = grid[pos->y][pos->x].walls;
   Vec2i target;
 
-  debug_log("makeMove\n");
+  fdebug_log("makeMove (dirhash: %d, rgtHash: %d, lftHash: %d)\n\n", dirHash,
+             rgtHash, lftHash);
 
-  // BUGBUG: this is just going north always if I am facing north
-  // already. I need to make it so that instead chooses the direction of
-  // highest decent in distance to goal.
-  if (!(dirHash & NORTH)) {
-    target.x = 0;
-    target.y = 1;
-  } else if (!(dirHash & EAST)) {
-    target.x = 1;
-    target.y = 0;
-  } else if (!(dirHash & WEST)) {
-    target.x = -1;
-    target.y = 0;
+  // TODO: this algorithm goes forward unless it is at a dead end. If so
+  // it looks right, then left. If it still cannot go there it just
+  // turns around left. I still need to do the logic to choose the path
+  // of greatest distance descent.
+  if (!(walls & (1 << dirHash))) {
+    target.x = dir->x;
+    target.y = dir->y;
+  } else if (!(walls & (1 << rgtHash))) {
+    target = getRightRot(*dir);
+  } else if (!(walls & (1 << lftHash))) {
+    target = getLeftRot(*dir);
   } else {
-    return IDLE;
+    // turn around
+    target.x = -dir->x;
+    target.y = -dir->y;
   }
 
   // to decide the move I will use a combination of the dot product and
   // the two-point-slope equation at the origin.
   // https://www.desmos.com/calculator/u9gmoingmu
 
+  fdebug_log("%d, %d\n", target.x, target.y);
+  fdebug_log("%d, %d\n", dir->x, dir->y);
   switch (dotProd(target, *dir)) {
   case 1:
+    debug_log("FORWARD");
     advance(dir, pos);
     return FORWARD;
   case -1:
     // arbitrary decision when facing the opposite way
+    debug_log("DEAD END -> LEFT");
     rotLeft(dir);
     return LEFT;
   default:
@@ -206,15 +217,18 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   switch (getWinding(target, *dir)) {
   case 1:
     // go clockwise (positive rotation)
+    debug_log("LEFT");
     rotLeft(dir);
     return LEFT;
   case -1:
     // go counter-clockwise (negative rotation)
+    debug_log("RIGHT");
     rotRight(dir);
     return RIGHT;
   default:
     debug_log("This is bad\n");
     // this should technically never happen
+    debug_log("IDLE");
     return IDLE;
   }
 }

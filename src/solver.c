@@ -62,7 +62,7 @@ Action floodFillWalker(int success) {
     }
 
     if (updateCellState(pos, dir, &state)) {
-        fdebug_log("state: %d\n", state);
+        fdebug_log("x: %d, y: %d, compass: %c (x: %d, y: %d), state: %d\n", pos.x, pos.y, compass(flattenStdBasis(dir)), dir.x, dir.y, state);
     } else {
         debug_log("Bad position");
     }

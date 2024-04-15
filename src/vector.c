@@ -67,6 +67,10 @@ int serialize(const Vec2i * const dir, int width) {
   return dir->x + dir->y * width;
 }
 
+int getSerial(Vec2i dir, int width) {
+  return dir.x + dir.y * width;
+}
+
 Vec2i deserialize(int hash, int width) {
   return (Vec2i){hash % width, hash / width};
 }
