@@ -90,6 +90,38 @@ int getCellState(Vec2i pos, int * state) {
   return 0;
 }
 
+static void updateWalls(Vec2i pos, int serial) {
+  Vec2i next;
+  const Vec2i NBS[4] = {
+    { 1,  0}, // right
+    { 0,  1}, // up
+    {-1,  0}, // left
+    { 0, -1}  // down
+  };
+  const int WALL_MASK[4] = {
+    WALL_EAST , // right
+    WALL_NORTH, // up
+    WALL_WEST , // left
+    WALL_SOUTH  // down
+  };
+  const int WALL_MASK_PAIR[4] = {
+    WALL_WEST , // right
+    WALL_SOUTH, // up
+    WALL_EAST , // left
+    WALL_NORTH  // down
+  };
+  grid[pos.y][pos.x].walls = serial;
+  for (int i = 0; i < 4; ++i) {
+    next = addVectors(pos, NBS[i]);
+    if (
+      inRange(&next, LOW_BOUND, UPP_BOUND) &&
+      grid[pos.y][pos.x].walls & WALL_MASK[i]
+    ) {
+      grid[next.y][next.x].walls |= WALL_MASK_PAIR[i];
+    }
+  }
+}
+
 int updateCellState(Vec2i pos, Vec2i dir, int *state) {
   if (inRange(&pos, LOW_BOUND, UPP_BOUND)) {
     const int wallFront = API_wallFront();
@@ -124,7 +156,7 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
       *state |= 1 << serial;
     }
 
-    grid[pos.y][pos.x].walls = *state;
+    updateWalls(pos, *state);
     floodFill();
     return 1;
   }
@@ -202,7 +234,7 @@ static int enqueue(int x, int y, int dist) {
 }
 
 static void floodFill() {
-  initQueue(WIDTH * HEIGHT, sizeof(int));
+  initQueue(2 * (WIDTH + HEIGHT), sizeof(int));
 
   // push goal onto queue
   enqueue(MID_GOAL.x    , MID_GOAL.y    , 0);
@@ -233,8 +265,8 @@ static void floodFill() {
       next = addVectors(pos, NBS[i]);
       if (
         inRange(&next, LOW_BOUND, UPP_BOUND) &&
-        !(here.walls & WALL_MASK[i]) &&
-        grid[next.y][next.x].visited != visitBit
+        grid[next.y][next.x].visited != visitBit &&
+        !(here.walls & WALL_MASK[i])
       ) {
         enqueue(next.x, next.y, here.dist + 1);
       }
@@ -242,5 +274,4 @@ static void floodFill() {
   }
 
   visitBit = !visitBit;
-  return;
 }

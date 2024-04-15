@@ -5,7 +5,7 @@
 
 Action solver(int success) {
     return floodFillWalker(success);
-    // return leftWallFollower(crashed);
+    // return leftWallFollower(success);
 }
 
 // This is an example of a simple left wall following algorithm.
