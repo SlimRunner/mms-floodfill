@@ -43,7 +43,7 @@ int flattenStdBasis(const Vec2i vec);
 /// @return n, w, s, or e
 char compass(int dirSerial);
 
-int inRange(const Vec2i * const dir, Vec2i low, Vec2i high);
+int inRange(const Vec2i * const pos, Vec2i low, Vec2i high);
 
 int serialize(const Vec2i * const dir, int width);
 

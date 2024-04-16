@@ -56,10 +56,10 @@ char compass(int dirSerial) {
   }
 }
 
-int inRange(const Vec2i * const dir, Vec2i low, Vec2i high) {
+int inRange(const Vec2i * const pos, Vec2i low, Vec2i high) {
   return (
-    low.x <= dir->x && dir->x <= high.x &&
-    low.y <= dir->y && dir->y <= high.y
+    low.x <= pos->x && pos->x <= high.x &&
+    low.y <= pos->y && pos->y <= high.y
   );
 }
 

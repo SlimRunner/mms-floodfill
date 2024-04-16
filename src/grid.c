@@ -165,11 +165,29 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
   return 0;
 }
 
+static int isCloserToGoal(const Vec2i *const pos, const Vec2i *const dir, int *dist) {
+  Vec2i there = addVectors(*dir, *pos);
+  if (
+    inRange(&there, LOW_BOUND, UPP_BOUND) &&
+    *dist > grid[there.y][there.x].dist
+  ) {
+    *dist = grid[there.y][there.x].dist;
+    return 1;
+  }
+
+  return 0;
+}
+
 Action makeMove(Vec2i *pos, Vec2i *dir) {
+  Vec2i ldir = getLeftRot(*dir);
+  Vec2i rdir = getRightRot(*dir);
+  Vec2i bdir = (Vec2i){-dir->x, -dir->y};
   int dirHash = flattenStdBasis(*dir);
-  int lftHash = flattenStdBasis(getLeftRot(*dir));
-  int rgtHash = flattenStdBasis(getRightRot(*dir));
+  int lftHash = flattenStdBasis(ldir);
+  int rgtHash = flattenStdBasis(rdir);
   int walls = grid[pos->y][pos->x].walls;
+  int dist = grid[pos->y][pos->x].dist;
+  int boxedIn = 1;
   Vec2i target;
 
   fdebug_log("makeMove (dirhash: %d, rgtHash: %d, lftHash: %d)\n\n", dirHash,
@@ -179,17 +197,34 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   // it looks right, then left. If it still cannot go there it just
   // turns around left. I still need to do the logic to choose the path
   // of greatest distance descent.
-  if (!(walls & (1 << dirHash))) {
-    target.x = dir->x;
-    target.y = dir->y;
-  } else if (!(walls & (1 << rgtHash))) {
-    target = getRightRot(*dir);
-  } else if (!(walls & (1 << lftHash))) {
-    target = getLeftRot(*dir);
-  } else {
+  if (
+    !(walls & (1 << dirHash)) &&
+    isCloserToGoal(pos, dir, &dist)
+  ) {
+    target = *dir;
+    boxedIn = 0;
+  }
+  if (
+    !(walls & (1 << rgtHash)) &&
+    isCloserToGoal(pos, &rdir, &dist)
+  ) {
+    target = rdir;
+    boxedIn = 0;
+  }
+  if (
+    !(walls & (1 << lftHash)) &&
+    isCloserToGoal(pos, &ldir, &dist)
+  ) {
+    target = ldir;
+    boxedIn = 0;
+  }
+  if (
+    boxedIn &&
+    isCloserToGoal(pos, &bdir, &dist)
+  ) {
+    // there can never be a wall behind you unless you start boxed in
     // turn around
-    target.x = -dir->x;
-    target.y = -dir->y;
+    target = bdir;
   }
 
   // to decide the move I will use a combination of the dot product and
