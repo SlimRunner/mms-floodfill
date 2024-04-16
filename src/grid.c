@@ -303,7 +303,7 @@ static int enqueue(int x, int y, int dist) {
 }
 
 static void floodFill() {
-  initQueue(2 * (WIDTH + HEIGHT), sizeof(int));
+  initQueue(2 * (WIDTH + HEIGHT));
 
   // push goal onto queue
   if (mmode != WM_RETURN) {

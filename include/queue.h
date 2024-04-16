@@ -1,7 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-void initQueue(int count, int size);
+void initQueue(int count);
 void freeQueue();
 
 int qpush(int value);

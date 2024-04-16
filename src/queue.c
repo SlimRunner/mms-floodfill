@@ -6,10 +6,11 @@ static int * queue = NULL;
 static int max_size;
 int lnode = 0, rnode = 0, qsize = 0;
 
-void initQueue(int count, int size) {
+void initQueue(int count) {
   if (queue) return;
+  int size = sizeof(int);
   max_size = count;
-  queue = (int *)calloc(count, size);
+  queue = calloc(count, size);
   lnode = 0;
   rnode = 0;
   qsize = 0;
