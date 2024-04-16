@@ -30,4 +30,10 @@ typedef enum Walls {
   WALL_EAST = 1 << EAST
 } Walls;
 
+typedef enum WalkMode {
+  WM_EXPLORE,
+  WM_RETURN,
+  WM_SPEEDRUN
+} WalkMode;
+
 #endif // ENUMS_H

@@ -17,7 +17,7 @@ static void floodFill();
 typedef struct CellState {
   int walls;
   int dist;
-  int visited;
+  int bfsVisited;
 } CellState;
 
 // this is used to "flip" the state of visited cells. It's purpose is to
@@ -27,6 +27,7 @@ typedef struct CellState {
 int visitBit = 1;
 
 static CellState **grid;
+static WalkMode mmode = WM_EXPLORE;
 static Vec2i LOW_BOUND = {0, 0};
 static Vec2i UPP_BOUND = {-1, -1};
 static Vec2i MID_GOAL = {-1, -1};
@@ -52,7 +53,7 @@ void initGrid() {
         !(UPP_BOUND.y - y) * WALL_NORTH |
         !(UPP_BOUND.x - x) * WALL_EAST
       );
-      grid[y][x].visited = !visitBit;
+      grid[y][x].bfsVisited = !visitBit;
 
       #ifdef SIM_API
       if (grid[y][x].walls & WALL_WEST) {
@@ -178,6 +179,20 @@ static int isCloserToGoal(const Vec2i *const pos, const Vec2i *const dir, int *d
   return 0;
 }
 
+static void cycleWalkMode() {
+  switch (mmode) {
+  case WM_EXPLORE:
+    mmode = WM_RETURN;
+    break;
+  case WM_RETURN:
+    mmode = WM_EXPLORE;
+    break;
+  case WM_SPEEDRUN:
+    mmode = WM_SPEEDRUN;
+    break;
+  }
+}
+
 Action makeMove(Vec2i *pos, Vec2i *dir) {
   Vec2i ldir = getLeftRot(*dir);
   Vec2i rdir = getRightRot(*dir);
@@ -189,6 +204,11 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   int dist = grid[pos->y][pos->x].dist;
   int boxedIn = 1;
   Vec2i target;
+
+  if (!dist) {
+    cycleWalkMode();
+    return IDLE;
+  }
 
   fdebug_log("makeMove (dirhash: %d, rgtHash: %d, lftHash: %d)\n\n", dirHash,
              rgtHash, lftHash);
@@ -270,7 +290,7 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
 
 static int enqueue(int x, int y, int dist) {
   grid[y][x].dist = dist;
-  grid[y][x].visited = visitBit;
+  grid[y][x].bfsVisited = visitBit;
 
   #ifdef SIM_API
   // 10 digits + 1 possible sign + null
@@ -286,10 +306,14 @@ static void floodFill() {
   initQueue(2 * (WIDTH + HEIGHT), sizeof(int));
 
   // push goal onto queue
-  enqueue(MID_GOAL.x    , MID_GOAL.y    , 0);
-  enqueue(MID_GOAL.x + 1, MID_GOAL.y    , 0);
-  enqueue(MID_GOAL.x    , MID_GOAL.y + 1, 0);
-  enqueue(MID_GOAL.x + 1, MID_GOAL.y + 1, 0);
+  if (mmode != WM_RETURN) {
+    enqueue(MID_GOAL.x    , MID_GOAL.y    , 0);
+    enqueue(MID_GOAL.x + 1, MID_GOAL.y    , 0);
+    enqueue(MID_GOAL.x    , MID_GOAL.y + 1, 0);
+    enqueue(MID_GOAL.x + 1, MID_GOAL.y + 1, 0);
+  } else {
+    enqueue(0, 0, 0);
+  }
 
   CellState here;
   int qidx;
@@ -314,7 +338,7 @@ static void floodFill() {
       next = addVectors(pos, NBS[i]);
       if (
         inRange(&next, LOW_BOUND, UPP_BOUND) &&
-        grid[next.y][next.x].visited != visitBit &&
+        grid[next.y][next.x].bfsVisited != visitBit &&
         !(here.walls & WALL_MASK[i])
       ) {
         enqueue(next.x, next.y, here.dist + 1);
