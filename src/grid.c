@@ -206,6 +206,7 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   Vec2i target;
 
   if (!dist) {
+    debug_log(mmode == WM_RETURN ? "=== TRIP ===" : "=== GOAL ===");
     cycleWalkMode();
     return IDLE;
   }
@@ -250,7 +251,7 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
 
   fdebug_log(
     "(%d, %d) -> (%d, %d) ",
-    target.x, target.y, dir->x, dir->y
+    dir->x, dir->y, target.x, target.y
   );
   switch (dotProd(target, *dir)) {
   case 1:
