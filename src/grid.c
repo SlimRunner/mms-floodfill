@@ -210,9 +210,6 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
     return IDLE;
   }
 
-  fdebug_log("makeMove (dirhash: %d, rgtHash: %d, lftHash: %d)\n\n", dirHash,
-             rgtHash, lftHash);
-
   // TODO: this algorithm goes forward unless it is at a dead end. If so
   // it looks right, then left. If it still cannot go there it just
   // turns around left. I still need to do the logic to choose the path
@@ -251,8 +248,10 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   // the two-point-slope equation at the origin.
   // https://www.desmos.com/calculator/u9gmoingmu
 
-  fdebug_log("%d, %d\n", target.x, target.y);
-  fdebug_log("%d, %d\n", dir->x, dir->y);
+  fdebug_log(
+    "(%d, %d) -> (%d, %d) ",
+    target.x, target.y, dir->x, dir->y
+  );
   switch (dotProd(target, *dir)) {
   case 1:
     debug_log("FORWARD");
@@ -260,7 +259,7 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
     return FORWARD;
   case -1:
     // arbitrary decision when facing the opposite way
-    debug_log("DEAD END -> LEFT");
+    debug_log("DEAD END -> GO LEFT");
     rotLeft(dir);
     return LEFT;
   default:
@@ -281,7 +280,7 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
     rotRight(dir);
     return RIGHT;
   default:
-    debug_log("This is bad\n");
+    debug_log("Error state\n");
     // this should technically never happen
     debug_log("IDLE");
     return IDLE;

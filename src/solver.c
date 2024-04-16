@@ -55,14 +55,17 @@ Action floodFillWalker(int success) {
     static Vec2i prevPos = {0, 0};
     static Vec2i pos = {0, 0};
     static Vec2i dir = {0, 1};
-    int state;
+    int walls;
 
     if (!success) {
+        debug_log("CRASHED RECORDED");
         pos = prevPos;
     }
 
-    if (updateCellState(pos, dir, &state)) {
-        fdebug_log("x: %d, y: %d, compass: %c (x: %d, y: %d), state: %d\n", pos.x, pos.y, compass(flattenStdBasis(dir)), dir.x, dir.y, state);
+    if (updateCellState(pos, dir, &walls)) {
+        fdebug_log(
+            "\nAt (x: %d, y: %d),\n    compass: %c (x: %d, y: %d),\n    walls: 0x%x,\n    "
+            , pos.x, pos.y, compass(flattenStdBasis(dir)), dir.x, dir.y, walls);
     } else {
         debug_log("Bad position");
     }
