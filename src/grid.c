@@ -24,9 +24,9 @@ typedef struct CellState {
 // avoid clearing the whole grid each time we call the floodfill such
 // that each time either the 0 or the 1 is interpreted as the "visited"
 // state. This is more akin to double buffering in graphics.
-int visitBit = 1;
+static int visitBit = 1;
 
-static CellState **grid;
+static CellState **grid = NULL;
 static WalkMode mmode = WM_EXPLORE;
 static Vec2i LOW_BOUND = {0, 0};
 static Vec2i UPP_BOUND = {-1, -1};
@@ -211,10 +211,6 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
     return IDLE;
   }
 
-  // TODO: this algorithm goes forward unless it is at a dead end. If so
-  // it looks right, then left. If it still cannot go there it just
-  // turns around left. I still need to do the logic to choose the path
-  // of greatest distance descent.
   if (
     !(walls & (1 << dirHash)) &&
     isCloserToGoal(pos, dir, &dist)
