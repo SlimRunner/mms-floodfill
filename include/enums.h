@@ -30,9 +30,13 @@ typedef enum Walls {
   WALL_EAST = 1 << EAST
 } Walls;
 
+typedef enum PathTarget {
+  PT_GOAL,
+  PT_HOME
+} PathTarget;
+
 typedef enum WalkMode {
   WM_EXPLORE,
-  WM_RETURN,
   WM_SPEEDRUN
 } WalkMode;
 

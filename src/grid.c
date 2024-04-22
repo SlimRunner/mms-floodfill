@@ -27,7 +27,8 @@ typedef struct CellState {
 static int visitBit = 1;
 
 static CellState **grid = NULL;
-static WalkMode mmode = WM_EXPLORE;
+static PathTarget mmtarget = PT_GOAL;
+static int forceFF = 0;
 static Vec2i LOW_BOUND = {0, 0};
 static Vec2i UPP_BOUND = {-1, -1};
 static Vec2i MID_GOAL = {-1, -1};
@@ -111,6 +112,7 @@ static void updateWalls(Vec2i pos, int serial) {
     WALL_EAST , // left
     WALL_NORTH  // down
   };
+
   grid[pos.y][pos.x].walls = serial;
   for (int i = 0; i < 4; ++i) {
     next = addVectors(pos, NBS[i]);
@@ -129,9 +131,8 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
     const int wallLeft  = API_wallLeft();
     const int wallRight = API_wallRight();
 
-    // TODO: make it so that this does not change further once the cell
-    // has been visited by the mouse.
-    *state = grid[pos.y][pos.x].walls;
+    const int prevState = grid[pos.y][pos.x].walls;
+    *state = prevState;
 
     if (wallFront) {
       const int serial = flattenStdBasis(dir);
@@ -160,7 +161,13 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
     }
 
     updateWalls(pos, *state);
-    floodFill();
+
+    // run floodfill only if the goal was reached or new walls have been
+    // found in the current path
+    if (forceFF || prevState != *state) {
+      forceFF = 0;
+      floodFill();
+    }
     return 1;
   }
   return 0;
@@ -179,16 +186,14 @@ static int isCloserToGoal(const Vec2i *const pos, const Vec2i *const dir, int *d
   return 0;
 }
 
-static void cycleWalkMode() {
-  switch (mmode) {
-  case WM_EXPLORE:
-    mmode = WM_RETURN;
+static void cycleTarget() {
+  forceFF = 1;
+  switch (mmtarget) {
+  case PT_GOAL:
+    mmtarget = PT_HOME;
     break;
-  case WM_RETURN:
-    mmode = WM_EXPLORE;
-    break;
-  case WM_SPEEDRUN:
-    mmode = WM_SPEEDRUN;
+  case PT_HOME:
+    mmtarget = PT_GOAL;
     break;
   }
 }
@@ -206,8 +211,8 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   Vec2i target;
 
   if (!dist) {
-    debug_log(mmode == WM_RETURN ? "=== TRIP ===" : "=== GOAL ===");
-    cycleWalkMode();
+    debug_log(mmtarget == PT_HOME ? "=== TRIP ===" : "=== GOAL ===");
+    cycleTarget();
     return IDLE;
   }
 
@@ -302,7 +307,7 @@ static void floodFill() {
   initQueue(2 * (WIDTH + HEIGHT));
 
   // push goal onto queue
-  if (mmode != WM_RETURN) {
+  if (mmtarget != PT_HOME) {
     enqueue(MID_GOAL.x    , MID_GOAL.y    , 0);
     enqueue(MID_GOAL.x + 1, MID_GOAL.y    , 0);
     enqueue(MID_GOAL.x    , MID_GOAL.y + 1, 0);
