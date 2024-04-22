@@ -63,6 +63,7 @@ Action floodFillWalker(int success) {
     }
 
     if (updateCellState(pos, dir, &walls)) {
+        API_setColor(pos.x, pos.y, 'B');
         fdebug_log(
             "\nAt (x: %d, y: %d),\n    compass: %c (x: %d, y: %d),\n    walls: 0x%x,\n    "
             , pos.x, pos.y, compass(flattenStdBasis(dir)), dir.x, dir.y, walls);
