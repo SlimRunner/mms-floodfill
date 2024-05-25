@@ -17,7 +17,8 @@ static void floodFill();
 typedef struct CellState {
   int walls;
   int dist;
-  int bfsVisited;
+  short bfsVisited;
+  short mseVisited;
 } CellState;
 
 // this is used to "flip" the state of visited cells. It's purpose is to
@@ -93,6 +94,12 @@ int getCellState(Vec2i pos, int * state) {
   return 0;
 }
 
+static int markAsVisited(const Vec2i *const pos) {
+  short visited = grid[pos->y][pos->x].mseVisited;
+  grid[pos->y][pos->x].mseVisited = 1;
+  return visited;
+}
+
 static void updateWalls(Vec2i pos, int serial) {
   Vec2i next;
   const Vec2i NBS[4] = {
@@ -164,8 +171,12 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
     updateWalls(pos, *state);
 
     // run floodfill only if the goal was reached or new walls have been
-    // found in the current path
-    if (forceFF || prevState != *state) {
+    // found in the current path or the cell had not yet been visited
+    if (
+      forceFF              ||
+      !markAsVisited(&pos) ||
+      prevState != *state
+    ) {
       forceFF = 0;
       floodFill();
     }
