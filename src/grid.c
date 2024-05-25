@@ -232,7 +232,9 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   Vec2i target;
 
   if (!dist) {
+    #ifdef SIM_API
     debug_log(mmtarget == PT_HOME ? "=== TRIP ===" : "=== GOAL ===");
+    #endif
     cycleTarget();
     return IDLE;
   }
@@ -271,18 +273,24 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   // the two-point-slope equation at the origin.
   // https://www.desmos.com/calculator/u9gmoingmu
 
+  #ifdef SIM_API
   fdebug_log(
     "(%d, %d) -> (%d, %d) ",
     dir->x, dir->y, target.x, target.y
   );
+  #endif
   switch (dotProd(target, *dir)) {
   case 1:
+    #ifdef SIM_API
     debug_log("FORWARD");
+    #endif
     advance(dir, pos);
     return FORWARD;
   case -1:
-    // arbitrary decision when facing the opposite way
+    #ifdef SIM_API
     debug_log("DEAD END -> GO LEFT");
+    #endif
+    // arbitrary decision when facing the opposite way
     rotLeft(dir);
     return LEFT;
   default:
@@ -294,18 +302,24 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   switch (getWinding(target, *dir)) {
   case 1:
     // go clockwise (positive rotation)
+    #ifdef SIM_API
     debug_log("LEFT");
+    #endif
     rotLeft(dir);
     return LEFT;
   case -1:
     // go counter-clockwise (negative rotation)
+    #ifdef SIM_API
     debug_log("RIGHT");
+    #endif
     rotRight(dir);
     return RIGHT;
   default:
+    #ifdef SIM_API
     debug_log("Error state\n");
-    // this should technically never happen
     debug_log("IDLE");
+    #endif
+    // this should technically never happen
     return IDLE;
   }
 }

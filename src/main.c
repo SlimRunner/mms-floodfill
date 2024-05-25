@@ -10,7 +10,9 @@ int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
     int success = 1;
+    #ifdef SIM_API
     debug_log("Running...");
+    #endif
     initGrid();
     while (1) {
         Action nextMove = solver(success);

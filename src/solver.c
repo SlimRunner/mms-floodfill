@@ -21,7 +21,9 @@ Action leftWallFollower(int success) {
 
     Action outState;
 
+    #ifdef SIM_API
     fdebug_log("x: %d, y: %d, compass: %c (x: %d, y: %d)\n", pos.x, pos.y, compass(flattenStdBasis(dir)), dir.x, dir.y);
+    #endif
 
     if (goLeft) {
         advance(&dir, &pos);
