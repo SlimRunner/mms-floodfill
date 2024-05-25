@@ -57,6 +57,16 @@ Action floodFillWalker(int success) {
     static Vec2i dir = {0, 1};
     int walls;
 
+    if (isRoundTrip()) {
+        if (resumeTrip(API_wasReset())) {
+            // REMOVE THIS IF STATEMENT WHEN RUNNING ON MICE
+            API_ackReset();
+            dir.x = 0;
+            dir.y = 1;
+        }
+        return IDLE;
+    }
+
     if (!success) {
         debug_log("CRASHED RECORDED");
         pos = prevPos;

@@ -29,6 +29,7 @@ static int visitBit = 1;
 static CellState **grid = NULL;
 static PathTarget mmtarget = PT_GOAL;
 static int forceFF = 0;
+static int roundTrip = 0;
 static Vec2i LOW_BOUND = {0, 0};
 static Vec2i UPP_BOUND = {-1, -1};
 static Vec2i MID_GOAL = {-1, -1};
@@ -191,9 +192,11 @@ static void cycleTarget() {
   switch (mmtarget) {
   case PT_GOAL:
     mmtarget = PT_HOME;
+    roundTrip = 0;
     break;
   case PT_HOME:
     mmtarget = PT_GOAL;
+    roundTrip = 1;
     break;
   }
 }
@@ -287,6 +290,18 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
     debug_log("IDLE");
     return IDLE;
   }
+}
+
+int isRoundTrip() {
+  return roundTrip;
+}
+
+int resumeTrip(int go) {
+  if (go) {
+    roundTrip = 0;
+    return 1;
+  }
+  return 0;
 }
 
 static int enqueue(int x, int y, int dist) {

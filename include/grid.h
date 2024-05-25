@@ -20,4 +20,8 @@ int updateCellState(Vec2i pos, Vec2i dir, int * state);
 
 Action makeMove(Vec2i *pos, Vec2i *dir);
 
+int isRoundTrip();
+
+int resumeTrip(int go);
+
 #endif // GRID_H
