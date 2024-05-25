@@ -185,6 +185,15 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
   return 0;
 }
 
+Action lookNorth(Vec2i *dir) {
+  const Vec2i NORTH_DIR = {0, 1};
+  if (dotProd(NORTH_DIR, *dir) != 1) {
+    rotRight(dir);
+    return RIGHT;
+  }
+  return IDLE;
+}
+
 static int isCloserToGoal(const Vec2i *const pos, const Vec2i *const dir, int *dist) {
   Vec2i there = addVectors(*dir, *pos);
   if (

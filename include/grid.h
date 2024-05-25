@@ -18,6 +18,8 @@ int getCellState(Vec2i pos, int * state);
 
 int updateCellState(Vec2i pos, Vec2i dir, int * state);
 
+Action lookNorth(Vec2i *dir);
+
 Action makeMove(Vec2i *pos, Vec2i *dir);
 
 int isRoundTrip();
