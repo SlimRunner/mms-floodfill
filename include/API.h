@@ -1,4 +1,7 @@
-#pragma once
+#ifndef API_H
+#define API_H
+
+#define SIM_API
 
 int API_mazeWidth();
 int API_mazeHeight();
@@ -27,3 +30,5 @@ void API_ackReset();
 
 void debug_log(char* text);
 void fdebug_log(const char *const format, ...);
+
+#endif // API_H

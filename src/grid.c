@@ -5,10 +5,8 @@
 
 #include <stdlib.h>
 
-#define SIM_API
-
+#include "API.h"
 #ifdef SIM_API
-  #include "API.h"
   #include "stdio.h"
 #endif
 
@@ -17,17 +15,20 @@ static void floodFill();
 typedef struct CellState {
   int walls;
   int dist;
-  int bfsVisited;
+  short bfsVisited;
+  short mseVisited;
 } CellState;
 
 // this is used to "flip" the state of visited cells. It's purpose is to
 // avoid clearing the whole grid each time we call the floodfill such
 // that each time either the 0 or the 1 is interpreted as the "visited"
 // state. This is more akin to double buffering in graphics.
-int visitBit = 1;
+static int visitBit = 1;
 
-static CellState **grid;
-static WalkMode mmode = WM_EXPLORE;
+static CellState **grid = NULL;
+static PathTarget mmtarget = PT_GOAL;
+static int forceFF = 0;
+static int roundTrip = 0;
 static Vec2i LOW_BOUND = {0, 0};
 static Vec2i UPP_BOUND = {-1, -1};
 static Vec2i MID_GOAL = {-1, -1};
@@ -91,6 +92,12 @@ int getCellState(Vec2i pos, int * state) {
   return 0;
 }
 
+static int markAsVisited(const Vec2i *const pos) {
+  short visited = grid[pos->y][pos->x].mseVisited;
+  grid[pos->y][pos->x].mseVisited = 1;
+  return visited;
+}
+
 static void updateWalls(Vec2i pos, int serial) {
   Vec2i next;
   const Vec2i NBS[4] = {
@@ -111,6 +118,7 @@ static void updateWalls(Vec2i pos, int serial) {
     WALL_EAST , // left
     WALL_NORTH  // down
   };
+
   grid[pos.y][pos.x].walls = serial;
   for (int i = 0; i < 4; ++i) {
     next = addVectors(pos, NBS[i]);
@@ -129,9 +137,8 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
     const int wallLeft  = API_wallLeft();
     const int wallRight = API_wallRight();
 
-    // TODO: make it so that this does not change further once the cell
-    // has been visited by the mouse.
-    *state = grid[pos.y][pos.x].walls;
+    const int prevState = grid[pos.y][pos.x].walls;
+    *state = prevState;
 
     if (wallFront) {
       const int serial = flattenStdBasis(dir);
@@ -160,10 +167,29 @@ int updateCellState(Vec2i pos, Vec2i dir, int *state) {
     }
 
     updateWalls(pos, *state);
-    floodFill();
+
+    // run floodfill only if the goal was reached or new walls have been
+    // found in the current path or the cell had not yet been visited
+    if (
+      forceFF              ||
+      !markAsVisited(&pos) ||
+      prevState != *state
+    ) {
+      forceFF = 0;
+      floodFill();
+    }
     return 1;
   }
   return 0;
+}
+
+Action lookNorth(Vec2i *dir) {
+  const Vec2i NORTH_DIR = {0, 1};
+  if (dotProd(NORTH_DIR, *dir) != 1) {
+    rotRight(dir);
+    return RIGHT;
+  }
+  return IDLE;
 }
 
 static int isCloserToGoal(const Vec2i *const pos, const Vec2i *const dir, int *dist) {
@@ -179,16 +205,16 @@ static int isCloserToGoal(const Vec2i *const pos, const Vec2i *const dir, int *d
   return 0;
 }
 
-static void cycleWalkMode() {
-  switch (mmode) {
-  case WM_EXPLORE:
-    mmode = WM_RETURN;
+static void cycleTarget() {
+  forceFF = 1;
+  switch (mmtarget) {
+  case PT_GOAL:
+    mmtarget = PT_HOME;
+    roundTrip = 0;
     break;
-  case WM_RETURN:
-    mmode = WM_EXPLORE;
-    break;
-  case WM_SPEEDRUN:
-    mmode = WM_SPEEDRUN;
+  case PT_HOME:
+    mmtarget = PT_GOAL;
+    roundTrip = 1;
     break;
   }
 }
@@ -206,14 +232,11 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   Vec2i target;
 
   if (!dist) {
-    cycleWalkMode();
+    debug_log(mmtarget == PT_HOME ? "=== TRIP ===" : "=== GOAL ===");
+    cycleTarget();
     return IDLE;
   }
 
-  // TODO: this algorithm goes forward unless it is at a dead end. If so
-  // it looks right, then left. If it still cannot go there it just
-  // turns around left. I still need to do the logic to choose the path
-  // of greatest distance descent.
   if (
     !(walls & (1 << dirHash)) &&
     isCloserToGoal(pos, dir, &dist)
@@ -250,7 +273,7 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
 
   fdebug_log(
     "(%d, %d) -> (%d, %d) ",
-    target.x, target.y, dir->x, dir->y
+    dir->x, dir->y, target.x, target.y
   );
   switch (dotProd(target, *dir)) {
   case 1:
@@ -287,6 +310,18 @@ Action makeMove(Vec2i *pos, Vec2i *dir) {
   }
 }
 
+int isRoundTrip() {
+  return roundTrip;
+}
+
+int resumeTrip(int go) {
+  if (go) {
+    roundTrip = 0;
+    return 1;
+  }
+  return 0;
+}
+
 static int enqueue(int x, int y, int dist) {
   grid[y][x].dist = dist;
   grid[y][x].bfsVisited = visitBit;
@@ -305,7 +340,7 @@ static void floodFill() {
   initQueue(2 * (WIDTH + HEIGHT));
 
   // push goal onto queue
-  if (mmode != WM_RETURN) {
+  if (mmtarget != PT_HOME) {
     enqueue(MID_GOAL.x    , MID_GOAL.y    , 0);
     enqueue(MID_GOAL.x + 1, MID_GOAL.y    , 0);
     enqueue(MID_GOAL.x    , MID_GOAL.y + 1, 0);

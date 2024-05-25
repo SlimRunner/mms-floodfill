@@ -63,17 +63,19 @@ $(DBG_APP_DIR)/$(TARGET): $(DBG_OBJECTS)
 	$(call MD,$(call FixPath,$(@D)))
 	$(CC) $(CCFLAGS) -o $(call FixPath,$@) $(call FixPath,$^)
 
-# only needed if more makefiles are added to this project
-# -include $(REL_DEPENDENCIES)
+# For some reason this does not work
+-include $(DEPS)
 
 # do not interpret these names as files
 .PHONY:
 	all build clean info
 	build-debug clean-debug info-debug
 
+build: DEPS := REL_DEPENDENCIES
 build: CCFLAGS += -O2
 build: $(REL_APP_DIR)/$(TARGET)
 
+build-debug: DEPS := DBG_DEPENDENCIES
 build-debug: CCFLAGS += -g
 build-debug: $(DBG_APP_DIR)/$(TARGET)
 
@@ -91,7 +93,7 @@ info:
 	@echo $(call FixQuotes,"[*] Objects dir:     ${REL_OBJ_DIR}")
 	@echo $(call FixQuotes,"[*] Sources:         ${SRC}")
 	@echo $(call FixQuotes,"[*] Objects:         ${REL_OBJECTS}")
-	@echo $(call FixQuotes,"[*] Dependencies:    ${REL_DEPENDENCIES}")
+	@echo $(call FixQuotes,"[*] Dependencies:    ${DEPS}")
 	@echo $(call FixQuotes,"[*] Detected OS:     ${detected_OS}")
 
 info-debug:
@@ -101,5 +103,5 @@ info-debug:
 	@echo $(call FixQuotes,"[*] Objects dir:     ${DBG_OBJ_DIR}")
 	@echo $(call FixQuotes,"[*] Sources:         ${SRC}")
 	@echo $(call FixQuotes,"[*] Objects:         ${DBG_OBJECTS}")
-	@echo $(call FixQuotes,"[*] Dependencies:    ${DBG_DEPENDENCIES}")
+	@echo $(call FixQuotes,"[*] Dependencies:    ${DEPS}")
 	@echo $(call FixQuotes,"[*] Detected OS:     ${detected_OS}")

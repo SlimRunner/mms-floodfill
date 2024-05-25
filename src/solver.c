@@ -31,7 +31,9 @@ Action leftWallFollower(int success) {
     }
 
     if(API_wallLeft()) {
+        #ifdef SIM_API
         API_setWall(pos.x, pos.y, compass(flattenStdBasis(getLeftRot(dir))));
+        #endif
         if(API_wallFront()) {
             rotRight(&dir);
             outState = RIGHT;
@@ -57,18 +59,37 @@ Action floodFillWalker(int success) {
     static Vec2i dir = {0, 1};
     int walls;
 
+    if (isRoundTrip()) {
+        #ifdef SIM_API
+        if (resumeTrip(API_wasReset())) {
+            API_ackReset();
+        }
+        #else
+            #error "RESUME IMPLEMETATION MISSING"
+        #endif
+        return lookNorth(&dir);
+    }
+
     if (!success) {
+        #ifdef SIM_API
         debug_log("CRASHED RECORDED");
+        #endif
         pos = prevPos;
     }
 
+    #ifdef SIM_API
     if (updateCellState(pos, dir, &walls)) {
+        API_setColor(pos.x, pos.y, 'B');
         fdebug_log(
             "\nAt (x: %d, y: %d),\n    compass: %c (x: %d, y: %d),\n    walls: 0x%x,\n    "
             , pos.x, pos.y, compass(flattenStdBasis(dir)), dir.x, dir.y, walls);
     } else {
         debug_log("Bad position");
     }
+    #else
+        #error "IMPLEMENT UPDATE BEHAVIOR"
+    #endif
+
     prevPos = pos;
     return makeMove(&pos, &dir);
 }
