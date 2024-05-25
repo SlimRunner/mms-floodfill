@@ -5,10 +5,8 @@
 
 #include <stdlib.h>
 
-#define SIM_API
-
+#include "API.h"
 #ifdef SIM_API
-  #include "API.h"
   #include "stdio.h"
 #endif
 

@@ -1,6 +1,8 @@
 #ifndef API_H
 #define API_H
 
+#define SIM_API
+
 int API_mazeWidth();
 int API_mazeHeight();
 
