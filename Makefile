@@ -49,7 +49,7 @@ all: build
 # Note to self: DO NOT ever try to change / for backslash ever again
 # breaks dependecies, targets, and overcomplicates things
 
-# release objects TODO add makefile
+# release objects
 $(REL_OBJ_DIR)/%.o: %.c Makefile
 	$(call MD,$(call FixPath,$(@D)))
 	$(CC) $(CCFLAGS) $(INCLUDE) -c $< -MMD -MP -o $@
@@ -74,11 +74,9 @@ $(DBG_APP_DIR)/$(TARGET): $(DBG_OBJECTS)
 	all build clean info
 	build-debug clean-debug info-debug
 
-build: DEPS = $(REL_DEPENDENCIES)
 build: CCFLAGS += -O2
 build: $(REL_APP_DIR)/$(TARGET)
 
-build-debug: DEPS = $(DBG_DEPENDENCIES)
 build-debug: CCFLAGS += -g
 build-debug: $(DBG_APP_DIR)/$(TARGET)
 
