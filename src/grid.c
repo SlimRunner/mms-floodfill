@@ -38,6 +38,7 @@ static int HEIGHT = -1;
 void initGrid() {
   if (grid) return;
 
+  forceFF = 1;
   WIDTH = API_mazeWidth();
   HEIGHT = API_mazeHeight();
   UPP_BOUND.x = WIDTH - 1;
