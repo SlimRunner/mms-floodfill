@@ -211,6 +211,8 @@ static void cycleTarget() {
   switch (mmtarget) {
   case PT_GOAL:
     mmtarget = PT_HOME;
+    // BUGBUG: do not set to one. Logic for goal trip stop hasn't been
+    // implemented.
     roundTrip = 0;
     break;
   case PT_HOME:
